@@ -1,8 +1,12 @@
-export interface Form {
+  export interface Form {
   id: string;
   title: string;
-  questions: Question[];
+  description?: string;   // ← did we add this line?
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+
 
 export interface Question {
   id: string;
