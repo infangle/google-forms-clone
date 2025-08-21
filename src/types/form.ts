@@ -1,6 +1,9 @@
   export interface Form {
   id: string;
   title: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
   description?: string;   // ← did we add this line?
   createdAt: Date;
   updatedAt: Date;
