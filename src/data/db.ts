@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 import type { Table } from "dexie";   
-import type { Form } from "../form"; 
+import type { Form } from "../types/form"; 
 
 export interface Question {
   id: string;
