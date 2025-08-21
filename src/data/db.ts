@@ -18,9 +18,9 @@ export interface Response {
 }
 
 export class AppDB extends Dexie {
-  forms!: Table<Form>;
-  questions!: Table<Question>;
-  responses!: Table<Response>;
+  forms!: Table<Form, string>;
+  questions!: Table<Question, string>;
+  responses!: Table<Response, string>;
 
   constructor() {
     super("AppDB");
