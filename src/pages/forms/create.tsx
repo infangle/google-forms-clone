@@ -8,15 +8,25 @@ export default function CreateFormPage() {
   const { questions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
 
   const handleSubmit = async (title: string, description: string) => {
-    // Optional: validate questions
-    if (questions.some((q) => q.text.trim() === "")) {
-      alert("Please fill in all question text.");
+  // Validate question text
+  if (questions.some((q) => q.text.trim() === "")) {
+    alert("Please fill in all question text.");
+    return;
+  }
+
+  // Validate options for multiple-choice and checkbox
+  for (const q of questions) {
+    if ((q.type === "multiple-choice" || q.type === "checkbox") && (!q.options || q.options.length === 0)) {
+      alert(`Question "${q.text}" must have at least one option.`);
       return;
     }
+  }
 
-    const form = await createForm({ title, description });
-    navigate(`/forms/${form.id}/edit`);
-  };
+  // All validations passed, create form
+  const form = await createForm({ title, description });
+  navigate(`/forms/${form.id}/edit`);
+};
+
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
