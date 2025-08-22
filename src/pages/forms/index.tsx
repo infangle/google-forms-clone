@@ -40,11 +40,13 @@ export default function FormsListPage() {
                 Edit
               </Link>
               <Link
-                to={`/forms/${form.id}/preview`}
-                className="text-green-600 hover:underline"
-              >
-                Preview
-              </Link>
+  to={`/forms/${form.id}/preview`}
+  state={{ form }} // <-- pass the full form object
+  className="text-green-600 hover:underline"
+>
+  Preview
+</Link>
+
               <Link
                 to={`/forms/${form.id}/responses`}
                 className="text-purple-600 hover:underline"

@@ -13,7 +13,7 @@ export default function EditFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [form, setForm] = useState<FormWithQuestions | null>(null);
-
+  
   useEffect(() => {
     
     async function loadForm() {
@@ -67,6 +67,10 @@ export default function EditFormPage() {
     navigate("/forms");
   };
 
+  const goToPreview = () => {
+    navigate(`/forms/${form.id}/preview`, { state: { form } });
+  };
+
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Edit Form</h1>
@@ -116,6 +120,9 @@ export default function EditFormPage() {
           className="bg-green-500 text-white px-6 py-2 rounded"
         >
           Save Changes
+        </button>
+        <button onClick={goToPreview} className="bg-blue-500 text-white px-4 py-2 rounded">
+          Preview
         </button>
       </div>
     </div>
