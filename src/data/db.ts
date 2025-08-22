@@ -1,7 +1,9 @@
 // src/data/db.ts
 import Dexie from 'dexie';
 import type { Table } from 'dexie';
-import type { Form, Question, Response } from '@/types/form';
+import type { Form } from '@/types/form';
+import type { Question } from '@/types/question';
+import type { Response } from '@/types/response';
 
 export class AppDB extends Dexie {
   // Tables
