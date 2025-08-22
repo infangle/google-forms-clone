@@ -8,15 +8,15 @@ export interface Form {
   updatedAt: Date;
   questions: Question[];
 }
-
 export interface Question {
   id: string;
-  formId: string;  // link question → form
+  formId: string;
   text: string;
-  type: "text" | "checkbox" | "multiple-choice";
-  options?: string[];
-  required?: boolean;
+  type: "text" | "paragraph" | "multiple-choice" | "checkbox" | "dropdown";
+  options?: string[]; // For multiple-choice, checkboxes, dropdown
+  required: boolean; 
 }
+
 
 export interface Response {
   id: string;
