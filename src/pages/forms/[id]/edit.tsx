@@ -1,11 +1,11 @@
-// src/pages/forms/edit.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import type { Form } from "@/types/form";
 import type { Question } from "@/types/question";
-import { updateQuestion } from "@/data/repos/questionsRepo";
 import { getFormById, updateForm } from "@/data/repos";
+import { updateQuestion } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
+import { useQuestions } from "@/hooks/useQuestions";
 
 interface FormWithQuestions extends Form {
   questions: Question[];
@@ -15,20 +15,21 @@ export default function EditFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [form, setForm] = useState<FormWithQuestions | null>(null);
-  
+  const { questions, setQuestions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
+
   useEffect(() => {
-    
     async function loadForm() {
       if (!id) return;
       const data = await getFormById(id);
       if (data) {
         setForm({ ...data, questions: data.questions ?? [] });
+        setQuestions(data.questions ?? []);
       } else {
         setForm(null);
       }
     }
     loadForm();
-  }, [id]);
+  }, [id, setQuestions]);
 
   if (!form) return <div>Loading...</div>;
 
@@ -36,45 +37,22 @@ export default function EditFormPage() {
     setForm({ ...form, [field]: value });
   };
 
-  const handleQuestionChange = async (index: number, updatedQuestion: Question) => {
-  const updatedQuestions = [...form.questions];
-  updatedQuestions[index] = updatedQuestion;
-  setForm({ ...form, questions: updatedQuestions });
-
-  // Persist the question immediately
-  await updateQuestion(updatedQuestion);
-};
-
-
-  const addQuestion = () => {
-    const newQuestion: Question = {
-      id: Date.now().toString(),
-      formId: form.id,
-      text: "",
-      type: "text",
-      options: [],
-      required: false,
-    };
-    setForm({ ...form, questions: [...form.questions, newQuestion] });
-  };
-
-  const removeQuestion = (index: number) => {
-    const updatedQuestions = form.questions.filter((_, i) => i !== index);
-    setForm({ ...form, questions: updatedQuestions });
+  const handleQuestionChange = async (index: number, updated: Question) => {
+    updateQuestionAt(index, updated);
+    await updateQuestion(updated); // Persist immediately
   };
 
   const handleSave = async () => {
-    // Validate all question texts
-    if (form.questions.some((q) => q.text.trim() === "")) {
+    if (questions.some((q) => q.text.trim() === "")) {
       alert("Please fill in all question text.");
       return;
     }
-    await updateForm(form.id, form);
+    await updateForm(form.id, { ...form, questions });
     navigate("/forms");
   };
 
   const goToPreview = () => {
-    navigate(`/forms/${form.id}/preview`, { state: { form } });
+    navigate(`/forms/${form.id}/preview`, { state: { form: { ...form, questions } } });
   };
 
   return (
@@ -101,13 +79,13 @@ export default function EditFormPage() {
       </label>
 
       <h2 className="text-xl font-semibold mb-2">Questions</h2>
-      {form.questions.map((q, index) => (
+      {questions.map((q, index) => (
         <QuestionEditor
           key={q.id}
           question={q}
           index={index}
-          onChange={(updatedQuestion) => handleQuestionChange(index, updatedQuestion)}
-          onRemove={() => removeQuestion(index)}
+          onChange={(updated) => handleQuestionChange(index, updated)}
+          onRemove={() => removeQuestionAt(index)}
         />
       ))}
 
@@ -127,7 +105,7 @@ export default function EditFormPage() {
         >
           Save Changes
         </button>
-        <button onClick={goToPreview} className="bg-blue-500 text-white px-4 py-2 rounded">
+        <button onClick={goToPreview} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
           Preview
         </button>
       </div>
