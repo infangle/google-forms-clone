@@ -6,6 +6,7 @@ export interface Form {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
+  questions: Question[];
 }
 
 export interface Question {
