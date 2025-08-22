@@ -1,5 +1,6 @@
-import Dexie from 'dexie';
-import type { Table } from "dexie";
+// src/data/db.ts
+
+import Dexie, { type Table } from "dexie";
 import type { Form, Question, Response } from "../types/form";
 
 export class AppDB extends Dexie {
@@ -8,10 +9,11 @@ export class AppDB extends Dexie {
   responses!: Table<Response, string>;
 
   constructor() {
-    super("AppDB");
+    super("GoogleFormsCloneDB");
+
     this.version(1).stores({
-      forms: "id, title, createdAt",
-      questions: "id, formId",
+      forms: "id, title, createdAt, updatedAt",
+      questions: "id, formId, type",
       responses: "id, formId, submittedAt"
     });
   }

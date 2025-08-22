@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getAllForms, deleteForm } from "../../data/formsRepo";
-import type { Form } from "../../types/form";
+import type { Form } from "@/types/form";
+import { getAllForms, deleteForm } from "@/data/formsRepo";
+
 
 export default function FormsListPage() {
   const [forms, setForms] = useState<Form[]>([]);
