@@ -35,9 +35,9 @@ export default function ResponsesPage() {
   if (!form) return <div>Form not found.</div>;
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-2">{form.title} - Responses</h1>
-      <p className="text-sm text-gray-500 mb-4">
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-2">{form.title}</h1>
+      <p className="text-lg text-gray-500 mb-4">
         Total responses: {responses.length}
       </p>
 
