@@ -9,7 +9,7 @@ export default function CreateFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const form = await createForm(title, description);
+    const form = await createForm({title, description});
     navigate(`/forms/${form.id}/edit`);
   };
 

@@ -1,21 +1,6 @@
-import Dexie from "dexie";
-import type { Table } from "dexie";   
-import type { Form } from "../types/form"; 
-
-export interface Question {
-  id: string;
-  formId: string;
-  type: "short" | "paragraph" | "multipleChoice" | "checkbox" | "dropdown";
-  text: string;
-  options?: string[];
-}
-
-export interface Response {
-  id: string;
-  formId: string;
-  answers: Record<string, string | string[]>; // questionId -> answer(s)
-  submittedAt: Date;
-}
+import Dexie from 'dexie';
+import type { Table } from "dexie";
+import type { Form, Question, Response } from "../types/form";
 
 export class AppDB extends Dexie {
   forms!: Table<Form, string>;
