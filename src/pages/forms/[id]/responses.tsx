@@ -1,8 +1,10 @@
 // src/pages/forms/responses.tsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import type { Form, Response, Question } from "@/types/form";
-import { getFormById, getResponsesByFormId } from "@/data/formsRepo";
+import type { Form} from "@/types/form";
+import type { Response } from "@/types/response";
+import type { Question } from "@/types/question";
+import { getFormById, getResponsesByFormId } from "@/data/repos";
 
 export default function ResponsesPage() {
   const { id } = useParams<{ id: string }>();
@@ -60,6 +62,7 @@ export default function ResponsesPage() {
                 <tr key={res.id} className="text-center">
                   <td className="border px-4 py-2">{index + 1}</td>
                   {form.questions.map((q: Question) => {
+                    if (!id) return
                     const answer = res.answers[q.id];
                     if (Array.isArray(answer)) {
                       return (

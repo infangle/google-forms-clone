@@ -1,4 +1,4 @@
-// src/types/form.ts
+import type { Question } from "./question";
 
 export interface Form {
   id: string;
@@ -6,21 +6,5 @@ export interface Form {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
-  questions: Question[];
-}
-export interface Question {
-  id: string;
-  formId: string;
-  text: string;
-  type: "text" | "paragraph" | "multiple-choice" | "checkbox" | "dropdown";
-  options?: string[]; // For multiple-choice, checkboxes, dropdown
-  required: boolean; 
-}
-
-
-export interface Response {
-  id: string;
-  formId: string;
-  answers: Record<string, string | string[]>; // key = questionId
-  submittedAt: Date;
+  questions: Question[]; // reference to associated questions
 }

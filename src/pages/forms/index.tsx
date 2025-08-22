@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Form } from "@/types/form";
-import { getAllForms, deleteForm } from "@/data/formsRepo";
+import { getAllForms, deleteForm } from "@/data/repos";
 
 
 export default function FormsListPage() {

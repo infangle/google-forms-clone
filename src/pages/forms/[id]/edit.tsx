@@ -1,8 +1,10 @@
 // src/pages/forms/edit.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import type { Form, Question } from "@/types/form";
-import { getFormById, updateForm } from "@/data/formsRepo";
+import type { Form } from "@/types/form";
+import type { Question } from "@/types/question";
+
+import { getFormById, updateForm } from "@/data/repos";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 
 interface FormWithQuestions extends Form {

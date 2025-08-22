@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createForm } from "../../data/formsRepo";
+import { createForm } from "../../data/repos/formsRepo";
 
 export default function CreateFormPage() {
   const [title, setTitle] = useState("");
