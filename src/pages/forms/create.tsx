@@ -22,6 +22,20 @@ export default function CreateFormPage() {
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Create New Form</h1>
 
+      <div className="flex justify-end mt-2">
+        <button
+          type="button"
+          onClick={() => {
+            const titleInput = (document.getElementById("title") as HTMLInputElement).value;
+            const descInput = (document.getElementById("description") as HTMLTextAreaElement).value;
+            handleSubmit(titleInput, descInput);
+          }}
+    className="text-green-500 px-2 py-1 rounded hover:text-green-500 hover:underline focus:outline-none"
+        >
+          Create Form
+        </button>
+      </div>
+
       <label className="block mb-2">
         Title:
         <input type="text" placeholder="Form title" className="border p-2 w-full mt-1" id="title" />
@@ -43,23 +57,12 @@ export default function CreateFormPage() {
         />
       ))}
 
-      <button type="button" onClick={addQuestion} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+      <button type="button" onClick={addQuestion}             className="mt-1  text-blue-400 px-2 py-1 rounded hover: hover:text-blue-500 hover:underline focus:outline-none"
+>
         Add Question
       </button>
 
-      <div>
-        <button
-          type="button"
-          onClick={() => {
-            const titleInput = (document.getElementById("title") as HTMLInputElement).value;
-            const descInput = (document.getElementById("description") as HTMLTextAreaElement).value;
-            handleSubmit(titleInput, descInput);
-          }}
-          className="bg-green-500 text-white px-6 py-2 rounded"
-        >
-          Create Form
-        </button>
-      </div>
+      
     </div>
   );
 }

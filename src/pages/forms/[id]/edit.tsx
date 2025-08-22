@@ -39,7 +39,7 @@ export default function EditFormPage() {
 
   const handleQuestionChange = async (index: number, updated: Question) => {
     updateQuestionAt(index, updated);
-    await updateQuestion(updated); // Persist immediately
+    await updateQuestion(updated);
   };
 
   const handleSave = async () => {
@@ -59,25 +59,28 @@ export default function EditFormPage() {
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Edit Form</h1>
 
-      <label className="block mb-2">
-        Title:
+      {/* Form Title */}
+      <label className="block mb-2 font-poppins font-normal">
+        Title
         <input
           type="text"
           value={form.title}
           onChange={(e) => handleChange("title", e.target.value)}
-          className="border p-2 w-full mt-1"
+          className="border border-gray-200 rounded-md p-2 w-full mt-1"
         />
       </label>
 
+      {/* Form Description */}
       <label className="block mb-4">
-        Description:
+        Description
         <textarea
           value={form.description ?? ""}
           onChange={(e) => handleChange("description", e.target.value)}
-          className="border p-2 w-full mt-1"
+          className="border border-gray-200 rounded-md p-2 w-full mt-1"
         />
       </label>
 
+      {/* Questions Section */}
       <h2 className="text-xl font-semibold mb-2">Questions</h2>
       {questions.map((q, index) => (
         <QuestionEditor
@@ -89,25 +92,57 @@ export default function EditFormPage() {
         />
       ))}
 
-      <button
-        type="button"
-        onClick={addQuestion}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-      >
-        Add Question
-      </button>
+      {/* Add Question Button */}
+      <div className="mb-4">
+        <div className="group inline-block">
+          <button
+            type="button"
+            onClick={addQuestion}
+            className="relative w-12 h-12 bg-white border border-gray-300 rounded flex items-center justify-center
+                       hover:border-blue-400 transition"
+          >
+            <span className="text-gray-600 text-2xl select-none">+</span>
+            <span className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+              Add question
+            </span>
+          </button>
+        </div>
+      </div>
 
-      <div>
+      {/* Save and Preview Buttons */}
+      <div className="flex items-center space-x-2">
         <button
           type="button"
           onClick={handleSave}
-          className="bg-green-500 text-white px-6 py-2 rounded"
+          className="rounded-md border border-gray-200 bg-white text-black px-6 py-2 hover:bg-blue-100 transition"
         >
           Save Changes
         </button>
-        <button onClick={goToPreview} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
-          Preview
-        </button>
+
+        <div className="group inline-block relative">
+          <button
+            onClick={goToPreview}
+            className="w-12 h-12 bg-white rounded flex items-center justify-center transition border border-gray-200 hover:border-blue-400"
+          >
+            {/* Eye icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-6 h-6 text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+
+            {/* Hover tooltip */}
+            <span className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+              Preview
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );
