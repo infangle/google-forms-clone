@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
-import type { Form, Question } from "@/types/form";
+import type { Form } from "@/types/form";
+import type { Question, Option } from "@/types/question";
 
 export default function PreviewPage() {
   const location = useLocation();
@@ -15,20 +16,30 @@ export default function PreviewPage() {
           <p className="font-medium mb-1">
             {index + 1}. {q.text} {q.required ? "*" : ""}
           </p>
+
+          {/* Text input */}
           {q.type === "text" && <input type="text" className="border p-2 w-full" />}
+
+          {/* Paragraph */}
           {q.type === "paragraph" && <textarea className="border p-2 w-full" />}
+
+          {/* Checkbox */}
           {q.type === "checkbox" &&
-            q.options?.map((opt: string, oIndex: number) => (
-              <label key={oIndex} className="flex items-center mb-1">
-                <input type="checkbox" className="mr-2" /> {opt}
+            q.options?.map((opt: Option) => (
+              <label key={opt.id} className="flex items-center mb-1">
+                <input type="checkbox" className="mr-2" /> {opt.text}
               </label>
             ))}
+
+          {/* Multiple-choice */}
           {q.type === "multiple-choice" &&
-            q.options?.map((opt: string, oIndex: number) => (
-              <label key={oIndex} className="flex items-center mb-1">
-                <input type="radio" name={`q${q.id}`} className="mr-2" /> {opt}
+            q.options?.map((opt: Option) => (
+              <label key={opt.id} className="flex items-center mb-1">
+                <input type="radio" name={`q${q.id}`} className="mr-2" /> {opt.text}
               </label>
             ))}
+
+          
         </div>
       ))}
     </div>

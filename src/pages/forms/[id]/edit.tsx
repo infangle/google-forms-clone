@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import type { Form } from "@/types/form";
 import type { Question } from "@/types/question";
-
+import { updateQuestion } from "@/data/repos/questionsRepo";
 import { getFormById, updateForm } from "@/data/repos";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 
@@ -36,11 +36,15 @@ export default function EditFormPage() {
     setForm({ ...form, [field]: value });
   };
 
-  const handleQuestionChange = (index: number, updatedQuestion: Question) => {
-    const updatedQuestions = [...form.questions];
-    updatedQuestions[index] = updatedQuestion;
-    setForm({ ...form, questions: updatedQuestions });
-  };
+  const handleQuestionChange = async (index: number, updatedQuestion: Question) => {
+  const updatedQuestions = [...form.questions];
+  updatedQuestions[index] = updatedQuestion;
+  setForm({ ...form, questions: updatedQuestions });
+
+  // Persist the question immediately
+  await updateQuestion(updatedQuestion);
+};
+
 
   const addQuestion = () => {
     const newQuestion: Question = {

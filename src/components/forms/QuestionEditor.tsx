@@ -1,5 +1,4 @@
-import { useState } from "react";
-import type { Question } from "@/types/form";
+import type { Question, Option } from "@/types/question";
 
 interface Props {
   question: Question;
@@ -15,12 +14,13 @@ export default function QuestionEditor({ question, index, onChange, onRemove }: 
 
   const handleOptionChange = (optionIndex: number, value: string) => {
     const updatedOptions = [...(question.options || [])];
-    updatedOptions[optionIndex] = value;
+    updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], text: value }; // <- fix here
     handleFieldChange("options", updatedOptions);
   };
 
   const addOption = () => {
-    handleFieldChange("options", [...(question.options || []), ""]);
+    const newOption: Option = { id: Date.now().toString(), text: "" }; // <- create Option object
+    handleFieldChange("options", [...(question.options || []), newOption]);
   };
 
   const removeOption = (optionIndex: number) => {
@@ -28,7 +28,7 @@ export default function QuestionEditor({ question, index, onChange, onRemove }: 
     handleFieldChange("options", updatedOptions);
   };
 
-  const isOptionType = question.type === "checkbox" || question.type === "multiple-choice" || question.type === "dropdown";
+  const isOptionType = question.type === "checkbox" || question.type === "multiple-choice";
 
   return (
     <div className="mb-4 border p-3 rounded">
@@ -51,7 +51,6 @@ export default function QuestionEditor({ question, index, onChange, onRemove }: 
           <option value="paragraph">Paragraph</option>
           <option value="checkbox">Checkbox</option>
           <option value="multiple-choice">Multiple Choice</option>
-          <option value="dropdown">Dropdown</option>
         </select>
       </div>
 
@@ -71,10 +70,10 @@ export default function QuestionEditor({ question, index, onChange, onRemove }: 
         <div className="mb-2">
           <p className="font-semibold">Options:</p>
           {question.options?.map((opt, i) => (
-            <div key={i} className="flex items-center mb-1">
+            <div key={opt.id} className="flex items-center mb-1">
               <input
                 type="text"
-                value={opt}
+                value={opt.text} // <- fix here
                 onChange={(e) => handleOptionChange(i, e.target.value)}
                 className="border p-1 flex-1 mr-2"
               />

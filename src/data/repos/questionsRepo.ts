@@ -37,3 +37,20 @@ export const deleteQuestion = async (questionId: string): Promise<void> => {
 export const getQuestionsByFormId = async (formId: string): Promise<Question[]> => {
   return db.questions.where("formId").equals(formId).toArray();
 };
+
+// Update a question
+export const updateQuestion = async (updatedQuestion: Question): Promise<void> => {
+  const existingQuestion = await db.questions.get(updatedQuestion.id);
+  if (!existingQuestion) return;
+
+  await db.questions.put(updatedQuestion);
+
+  const form = await db.forms.get(updatedQuestion.formId);
+  if (form) {
+    const updatedQuestions = form.questions.map(q =>
+      q.id === updatedQuestion.id ? updatedQuestion : q
+    );
+    form.questions = updatedQuestions;
+    await db.forms.put(form);
+  }
+};
