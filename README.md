@@ -27,7 +27,6 @@ A web-based form creation and management application, inspired by Google Forms. 
 - **Frontend**
   - [React](https://reactjs.org/) + TypeScript
   - [Tailwind CSS](https://tailwindcss.com/) for styling
-  - [Recharts](https://recharts.org/) for charts
   - [React Router](https://reactrouter.com/) for page navigation
 - **State Management**
   - Custom React hooks (e.g., `useQuestions`)  
