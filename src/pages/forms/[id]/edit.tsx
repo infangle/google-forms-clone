@@ -7,6 +7,7 @@ import { updateQuestion } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
 import { PreviewFormModal } from "@/components/PreviewFormModal";
+import { useForm } from "@/forms/hooks/useForm";
 
 interface FormWithQuestions extends Form {
   questions: Question[];
@@ -15,68 +16,85 @@ interface FormWithQuestions extends Form {
 export default function EditFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [form, setForm] = useState<FormWithQuestions | null>(null);
+  const [formData, setFormData] = useState<FormWithQuestions | null>(null);
   const { questions, setQuestions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const { values, handleChange, handleBlur, handleSubmit, isValid } = useForm({
+    initialValues: {
+      title: formData?.title || "",
+      description: formData?.description || "",
+    },
+    schema: {
+      title: [], // Add validators if needed
+      description: [], // Add validators if needed
+    },
+    onSubmit: async (values) => {
+      if (!formData) return;
+      
+      // Validate question text
+      if (questions.some((q) => q.text.trim() === "")) {
+        alert("Please fill in all question text.");
+        return;
+      }
+      
+      await updateForm(formData.id, { ...formData, ...values, questions });
+      navigate("/forms");
+    },
+  });
 
   useEffect(() => {
     async function loadForm() {
       if (!id) return;
       const data = await getFormById(id);
       if (data) {
-        setForm({ ...data, questions: data.questions ?? [] });
+        setFormData({ ...data, questions: data.questions ?? [] });
         setQuestions(data.questions ?? []);
       } else {
-        setForm(null);
+        setFormData(null);
       }
     }
     loadForm();
   }, [id, setQuestions]);
 
-  if (!form) return <div>Loading...</div>;
-
-  const handleChange = (field: keyof Form, value: string) => {
-    setForm({ ...form, [field]: value });
-  };
+  if (!formData) return <div>Loading...</div>;
 
   const handleQuestionChange = async (index: number, updated: Question) => {
     updateQuestionAt(index, updated);
     await updateQuestion(updated);
   };
 
-  const handleSave = async () => {
-    if (questions.some((q) => q.text.trim() === "")) {
-      alert("Please fill in all question text.");
-      return;
-    }
-    await updateForm(form.id, { ...form, questions });
-    navigate("/forms");
-  };
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Edit Form</h1>
 
-      {/* Form Title */}
-      <label className="block mb-2 font-poppins font-normal">
-        Title
-        <input
-          type="text"
-          value={form.title}
-          onChange={(e) => handleChange("title", e.target.value)}
-          className="border border-gray-200 rounded-md p-2 w-full mt-1"
-        />
-      </label>
+      <form onSubmit={handleSubmit}>
+        {/* Form Title */}
+        <label className="block mb-2 font-poppins font-normal">
+          Title
+          <input
+            type="text"
+            name="title"
+            value={values.title}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className="border border-gray-200 rounded-md p-2 w-full mt-1"
+          />
+        </label>
 
-      {/* Form Description */}
-      <label className="block mb-4">
-        Description
-        <textarea
-          value={form.description ?? ""}
-          onChange={(e) => handleChange("description", e.target.value)}
-          className="border border-gray-200 rounded-md p-2 w-full mt-1"
-        />
-      </label>
+        {/* Form Description */}
+        <label className="block mb-4">
+          Description
+          <textarea
+            name="description"
+            value={values.description}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className="border border-gray-200 rounded-md p-2 w-full mt-1"
+          />
+        </label>
+      </form>
 
       {/* Questions Section */}
       <h2 className="text-xl font-semibold mb-2">Questions</h2>
@@ -110,9 +128,9 @@ export default function EditFormPage() {
       {/* Save and Preview Buttons */}
       <div className="flex items-center space-x-2">
         <button
-          type="button"
-          onClick={handleSave}
+          type="submit"
           className="rounded-md border border-gray-200 bg-white text-black px-6 py-2 hover:bg-blue-100 transition"
+          disabled={!isValid}
         >
           Save Changes
         </button>
@@ -150,7 +168,7 @@ export default function EditFormPage() {
         <PreviewFormModal
           open={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
-          form={form}
+          form={{ ...formData, ...values }}
         />
       )}
     </div>
