@@ -6,7 +6,8 @@ import { getFormById, updateForm } from "@/data/repos";
 import { updateQuestion } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
-import FormPreview from "../../../components/forms/FormEditor";
+import { PreviewFormModal } from "@/components/PreviewFormModal";
+
 interface FormWithQuestions extends Form {
   questions: Question[];
 }
@@ -17,6 +18,7 @@ export default function EditFormPage() {
   const [form, setForm] = useState<FormWithQuestions | null>(null);
   const { questions, setQuestions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   useEffect(() => {
     async function loadForm() {
       if (!id) return;
@@ -50,7 +52,6 @@ export default function EditFormPage() {
     await updateForm(form.id, { ...form, questions });
     navigate("/forms");
   };
-
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -116,23 +117,17 @@ export default function EditFormPage() {
           Save Changes
         </button>
 
+        {/* Preview Button */}
         <div className="group inline-block relative">
           <button
-  onClick={() => setIsPreviewOpen(true)}
-  className="bg-blue-500 text-white px-4 py-2 rounded"
->
-  
-
-{isPreviewOpen && (
-  <FormPreview
-    form={form}
-    questions={questions}
-    onClose={() => setIsPreviewOpen(false)}
-  />)}
-            {/* Eye icon */}
+            type="button"
+            onClick={() => setIsPreviewOpen(true)}
+            className="p-2 rounded-full bg-white border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
+          >
+            {/* Eye Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6 text-gray-600"
+              className="w-6 h-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -149,6 +144,15 @@ export default function EditFormPage() {
           </button>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {isPreviewOpen && (
+        <PreviewFormModal
+          open={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          form={form}
+        />
+      )}
     </div>
   );
 }
