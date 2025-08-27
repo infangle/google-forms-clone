@@ -6,7 +6,7 @@ import { getFormById, updateForm } from "@/data/repos";
 import { updateQuestion } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
-
+import FormPreview from "../../../components/forms/FormEditor";
 interface FormWithQuestions extends Form {
   questions: Question[];
 }
@@ -16,7 +16,7 @@ export default function EditFormPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormWithQuestions | null>(null);
   const { questions, setQuestions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
-
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   useEffect(() => {
     async function loadForm() {
       if (!id) return;
@@ -51,9 +51,6 @@ export default function EditFormPage() {
     navigate("/forms");
   };
 
-  const goToPreview = () => {
-    navigate(`/forms/${form.id}/preview`, { state: { form: { ...form, questions } } });
-  };
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -121,9 +118,17 @@ export default function EditFormPage() {
 
         <div className="group inline-block relative">
           <button
-            onClick={goToPreview}
-            className="w-12 h-12 bg-white rounded flex items-center justify-center transition border border-gray-200 hover:border-blue-400"
-          >
+  onClick={() => setIsPreviewOpen(true)}
+  className="bg-blue-500 text-white px-4 py-2 rounded"
+>
+  
+
+{isPreviewOpen && (
+  <FormPreview
+    form={form}
+    questions={questions}
+    onClose={() => setIsPreviewOpen(false)}
+  />)}
             {/* Eye icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"

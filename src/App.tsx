@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import FormsListPage from "./pages/forms";
 import CreateFormPage from "./pages/forms/create";
 import EditFormPage from "./pages/forms/[id]/edit";
-import PreviewFormPage from "./pages/forms/[id]/preview";
 import ResponsesPage from "./pages/forms/[id]/responses";
 
 function App() {
@@ -20,7 +19,6 @@ function App() {
 
         {/* Single form routes */}
         <Route path="/forms/:id/edit" element={<EditFormPage />} />
-        <Route path="/forms/:id/preview" element={<PreviewFormPage />} />
         <Route path="/forms/:id/responses" element={<ResponsesPage />} />
       </Routes>
     </BrowserRouter>
