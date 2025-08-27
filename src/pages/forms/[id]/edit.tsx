@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import type { Form } from "@/types/form";
 import type { Question } from "@/types/question";
 import { getFormById, updateForm } from "@/data/repos";
+import { editFormSchema } from "@/forms/validation/schema";
 import { updateQuestion } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
@@ -20,15 +21,12 @@ export default function EditFormPage() {
   const { questions, setQuestions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const { values, handleChange, handleBlur, handleSubmit, isValid } = useForm({
+  const { values, handleChange, handleBlur, handleSubmit, isValid, setFieldValue } = useForm({
     initialValues: {
-      title: formData?.title || "",
-      description: formData?.description || "",
+      title: "",
+      description: "",
     },
-    schema: {
-      title: [], // Add validators if needed
-      description: [], // Add validators if needed
-    },
+    schema: editFormSchema,
     onSubmit: async (values) => {
       if (!formData) return;
       
@@ -50,12 +48,14 @@ export default function EditFormPage() {
       if (data) {
         setFormData({ ...data, questions: data.questions ?? [] });
         setQuestions(data.questions ?? []);
+        setFieldValue("title", data.title);
+        setFieldValue("description", data.description);
       } else {
         setFormData(null);
       }
     }
     loadForm();
-  }, [id, setQuestions]);
+  }, [id, setQuestions, setFieldValue]);
 
   if (!formData) return <div>Loading...</div>;
 
@@ -70,31 +70,32 @@ export default function EditFormPage() {
       <h1 className="text-2xl font-bold mb-4">Edit Form</h1>
 
       <form onSubmit={handleSubmit}>
-        {/* Form Title */}
-        <label className="block mb-2 font-poppins font-normal">
-          Title
+        <label className="block mb-2">
+          Title:
           <input
             type="text"
+            placeholder="Form title"
+            className="border p-2 w-full mt-1"
             name="title"
             value={values.title}
             onChange={handleChange}
             onBlur={handleBlur}
-            className="border border-gray-200 rounded-md p-2 w-full mt-1"
           />
         </label>
 
-        {/* Form Description */}
         <label className="block mb-4">
-          Description
+          Description:
           <textarea
+            placeholder="Form description"
+            className="border p-2 w-full mt-1"
             name="description"
             value={values.description}
             onChange={handleChange}
             onBlur={handleBlur}
-            className="border border-gray-200 rounded-md p-2 w-full mt-1"
           />
         </label>
-      </form>
+
+      
 
       {/* Questions Section */}
       <h2 className="text-xl font-semibold mb-2">Questions</h2>
@@ -126,9 +127,10 @@ export default function EditFormPage() {
       </div>
 
       {/* Save and Preview Buttons */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 mt-4">
         <button
           type="submit"
+          form="edit-form"
           className="rounded-md border border-gray-200 bg-white text-black px-6 py-2 hover:bg-blue-100 transition"
           disabled={!isValid}
         >
@@ -170,7 +172,8 @@ export default function EditFormPage() {
           onClose={() => setIsPreviewOpen(false)}
           form={{ ...formData, ...values }}
         />
-      )}
+      )} </form>
     </div>
+   
   );
 }

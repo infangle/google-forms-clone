@@ -101,7 +101,13 @@ export function useForm<T extends Record<string, any>>({
     setTouched({});
   };
 
-  const isValid = Object.values(errors).every(err => !err);
+  const isValid = Object.keys(values).every(key => {
+    // Only validate fields that have been touched or have validation errors
+    if (touched[key] || errors[key]) {
+      return !errors[key];
+    }
+    return true; // Untouched fields are considered valid
+  });
 
   return {
     values,

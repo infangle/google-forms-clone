@@ -1,22 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { createForm } from "@/data/repos/formsRepo";
+import { addQuestionToForm } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useForm } from "@/forms/hooks/useForm";
+import { createFormSchema } from "@/forms/validation/schema";
 
 export default function CreateFormPage() {
   const navigate = useNavigate();
   const { questions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
 
   const initialValues = {
-    title: "",
+    title: "untitled",
     description: "",
   };
 
-  const schema = {
-    title: [], // Add any validators if needed
-    description: [], // Add any validators if needed
-  };
+  const schema = createFormSchema;
 
   const { values, handleChange, handleBlur, handleSubmit, isValid } = useForm({
     initialValues,
@@ -38,7 +37,18 @@ export default function CreateFormPage() {
 
       // All validations passed, create form
       const form = await createForm({ title: values.title, description: values.description || "" });
-      navigate(`/forms/${form.id}/edit`);
+      
+      // Save all questions to the newly created form
+      for (const question of questions) {
+        await addQuestionToForm(form.id, {
+          text: question.text,
+          type: question.type,
+          options: question.options,
+          required: question.required
+        });
+      }
+      
+      navigate("/forms");
     },
   });
 
@@ -74,6 +84,13 @@ export default function CreateFormPage() {
         </label>
 
         <h2 className="text-xl font-semibold mb-2">Questions</h2>
+        <button
+          type="button"
+          onClick={addQuestion}
+          className="text-blue-500 mb-4"
+        >
+          Add Question
+        </button>
         {questions.map((q, index) => (
           <QuestionEditor
             key={q.id}
