@@ -19,9 +19,6 @@ A web-based form creation and management application, inspired by Google Forms. 
 - **Responsive UI**
   - Works seamlessly across desktop (1440px, 1024px) and mobile devices (375px).
   - Conditional rendering for tables, cards, and charts based on screen size.
-- **Analytics (Optional)**
-  - Display bar charts and line graphs for form responses.
-  - Analyze transactions or responses by category or date.
 
 ---
 
