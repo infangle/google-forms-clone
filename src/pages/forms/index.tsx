@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Form } from "@/types/form";
 import { getAllForms, deleteForm } from "@/data/repos";
-import CreateFormButton from "@/components/dashboard/CreateFormButton";
-import FormList from "@/components/forms/FormList";
+import CreateFormButton from "@/components/CreateFormButton";
+import FormList from "@/components/FormList";
 
 export default function FormsListPage() {
   const [forms, setForms] = useState<Form[]>([]);

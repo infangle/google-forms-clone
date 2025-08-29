@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import type { Form } from "@/types/form";
 import { getFormById, updateForm } from "@/data/repos";
-import QuestionEditor from "@/components/forms/QuestionEditor";
+import QuestionEditor from "@/components/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
-import FormPreviewModal from "@/components/forms/FormPreviewModal";
+import FormPreviewModal from "@/components/FormPreviewModal";
 import React from "react";
 
 export default function EditFormPage() {
