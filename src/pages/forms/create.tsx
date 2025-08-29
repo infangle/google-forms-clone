@@ -4,11 +4,11 @@ import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useState } from "react";
 import React from "react";
+// 1. Import the new modal component
+import FormPreviewModal from "@/components/forms/FormPreviewModal";
 
 export default function CreateFormPage() {
   const navigate = useNavigate();
-
-  // 1. Destructure dispatch and ACTION_TYPES from the hook
   const { questions, addQuestion, areQuestionsValid, dispatch, ACTION_TYPES } = useQuestions();
 
   const [formState, setFormState] = useState({
@@ -19,6 +19,9 @@ export default function CreateFormPage() {
       description: ""
     }
   });
+
+  // 2. Add state to manage the visibility of the preview modal
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -63,10 +66,19 @@ export default function CreateFormPage() {
       <h1 className="text-2xl font-bold mb-4">Create New Form</h1>
 
       <div className="flex justify-end mt-2">
+        {/* 3. Add a button to open the preview modal */}
+        <button
+          type="button"
+          onClick={() => setIsPreviewOpen(true)}
+          className="text-blue-500 px-2 py-1 rounded hover:text-blue-500 hover:underline focus:outline-none"
+        >
+          Preview
+        </button>
+        
         <button
           type="button"
           onClick={handleSubmit}
-          className="text-green-500 px-2 py-1 rounded hover:text-green-500 hover:underline focus:outline-none"
+          className="text-green-500 px-2 py-1 rounded hover:text-green-500 hover:underline focus:outline-none ml-4"
         >
           Create Form
         </button>
@@ -103,7 +115,6 @@ export default function CreateFormPage() {
           key={q.id}
           question={q}
           index={index}
-          // 2. Pass dispatch and ACTION_TYPES down as props
           dispatch={dispatch}
           ACTION_TYPES={ACTION_TYPES}
         />
@@ -111,11 +122,25 @@ export default function CreateFormPage() {
 
       <button
         type="button"
-        onClick={addQuestion} // This function is now just a wrapper for a dispatch call
+        onClick={addQuestion}
         className="mt-1 text-blue-400 px-2 py-1 rounded hover:text-blue-500 hover:underline focus:outline-none"
       >
         Add Question
       </button>
+
+      {/* 4. Conditionally render the preview modal */}
+      {isPreviewOpen && (
+        <FormPreviewModal
+      form={{
+        id: "preview-id", // Use a temporary, unique ID
+        createdAt: new Date(), // Use the current timestamp
+        updatedAt: new Date(), // Use the current timestamp
+        ...formState,
+        questions,
+      }}
+      onClose={() => setIsPreviewOpen(false)}
+    />
+      )}
     </div>
   );
 }

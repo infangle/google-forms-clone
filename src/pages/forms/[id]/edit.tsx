@@ -6,6 +6,7 @@ import { getFormById, updateForm } from "@/data/repos";
 import { updateQuestion as updateQuestionOnServer } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
+import FormPreviewModal from "@/components/forms/FormPreviewModal";
 
 interface FormWithQuestions extends Form {
   questions: Question[];
@@ -15,8 +16,11 @@ export default function EditFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [form, setForm] = useState<FormWithQuestions | null>(null);
+  
+  // 1. Add state to control modal visibility
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  // 1. Destructure dispatch and ACTION_TYPES from the hook
+  // Destructure dispatch and ACTION_TYPES from the hook
   const { questions, addQuestion, areQuestionsValid, dispatch, ACTION_TYPES } = useQuestions();
 
   useEffect(() => {
@@ -25,23 +29,19 @@ export default function EditFormPage() {
       const data = await getFormById(id);
       if (data) {
         setForm({ ...data, questions: data.questions ?? [] });
-        dispatch(data.questions ?? []);
+        dispatch({ type: ACTION_TYPES.SET_QUESTIONS, payload: { questions: data.questions ?? [] } });
       } else {
         setForm(null);
       }
     }
     loadForm();
-  }, [id, dispatch]);
+  }, [id, dispatch, ACTION_TYPES]);
 
   if (!form) return <div>Loading...</div>;
 
   const handleChange = (field: keyof Form, value: string) => {
     setForm({ ...form, [field]: value });
   };
-
-  // 2. The handleQuestionChange logic is no longer needed in the parent component.
-  // The QuestionEditor will now handle dispatching updates directly to the reducer.
-  // We'll rename the updateQuestion import to avoid conflicts.
   
   const handleSave = async () => {
     if (!form.title.trim()) {
@@ -64,7 +64,8 @@ export default function EditFormPage() {
   };
 
   const goToPreview = () => {
-    navigate(`/forms/${form.id}/preview`, { state: { form: { ...form, questions } } });
+    // 2. Change logic to open the modal instead of navigating
+    setIsPreviewOpen(true);
   };
 
   return (
@@ -99,7 +100,6 @@ export default function EditFormPage() {
           key={q.id}
           question={q}
           index={index}
-          // 3. Pass dispatch and ACTION_TYPES down as props
           dispatch={dispatch}
           ACTION_TYPES={ACTION_TYPES}
         />
@@ -157,6 +157,14 @@ export default function EditFormPage() {
           </button>
         </div>
       </div>
+      
+      {/* 3. Conditionally render the FormPreviewModal */}
+      {isPreviewOpen && form && (
+        <FormPreviewModal
+          form={{ ...form, questions }}
+          onClose={() => setIsPreviewOpen(false)}
+        />
+      )}
     </div>
   );
 }
