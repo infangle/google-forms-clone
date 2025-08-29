@@ -1,5 +1,6 @@
 import { db } from "../db";
 import type { Form } from "../../types/form";
+import type { Question } from "../../types/question"; // Make sure to import the Question type
 import { v4 as uuid } from "uuid";
 
 // CREATE a form
@@ -34,6 +35,17 @@ export const updateForm = async (id: string, updatedFields: Partial<Form>): Prom
   };
   await db.forms.put(updatedForm);
 };
+
+// NEW: Function to add questions to a specific form
+export const addQuestionsToForm = async (formId: string, questions: Question[]): Promise<void> => {
+  const form = await getFormById(formId);
+  if (!form) {
+    console.error(`Form with ID ${formId} not found.`);
+    return;
+  }
+  await updateForm(formId, { questions });
+};
+
 
 // DELETE
 export const deleteForm = async (id: string): Promise<void> => db.forms.delete(id);

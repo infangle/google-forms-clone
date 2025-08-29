@@ -12,7 +12,7 @@ export default function EditFormPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState<Form | null>(null);
   
-  // 1. Add state to control modal visibility and form field data
+  // State for modal and form fields
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [formState, setFormState] = useState({
     title: "",
@@ -23,21 +23,40 @@ export default function EditFormPage() {
     },
   });
 
-  // Destructure dispatch and ACTION_TYPES from the hook
+  // The useQuestions hook manages the questions state and actions
   const { questions, addQuestion, areQuestionsValid, dispatch, ACTION_TYPES } = useQuestions();
 
   useEffect(() => {
     async function loadForm() {
       if (!id) return;
+      
       const data = await getFormById(id);
+      
       if (data) {
-        setForm(data); // Set the full form object
+        // Check localStorage for pending questions from the create page
+        const pendingQuestionsString = localStorage.getItem(`pendingQuestions_${data.id}`);
+        let initialQuestions = data.questions ?? [];
+
+        if (pendingQuestionsString) {
+          try {
+            initialQuestions = JSON.parse(pendingQuestionsString);
+            // Clean up localStorage after loading the questions
+            localStorage.removeItem(`pendingQuestions_${data.id}`);
+          } catch (e) {
+            console.error("Failed to parse questions from localStorage", e);
+          }
+        }
+        
+        // Initialize the local form and questions state
+        setForm(data);
         setFormState({
           title: data.title,
           description: data.description ?? "",
           errors: { title: "", description: "" },
         });
-        dispatch({ type: ACTION_TYPES.SET_QUESTIONS, payload: { questions: data.questions ?? [] } });
+        
+        dispatch({ type: ACTION_TYPES.SET_QUESTIONS, payload: { questions: initialQuestions } });
+        
       } else {
         setForm(null);
       }
@@ -186,7 +205,7 @@ export default function EditFormPage() {
         </div>
       </div>
       
-      {/* 3. Conditionally render the FormPreviewModal */}
+      {/* Conditionally render the FormPreviewModal */}
       {isPreviewOpen && form && (
         <FormPreviewModal
           form={{ ...form, questions, title: formState.title, description: formState.description }}

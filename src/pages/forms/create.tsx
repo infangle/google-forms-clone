@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { createForm } from "@/data/repos/formsRepo";
+// Import the new function from the repository
+import { createForm, addQuestionsToForm } from "@/data/repos/formsRepo"; 
 import QuestionEditor from "@/components/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useState } from "react";
@@ -57,7 +58,13 @@ export default function CreateFormPage() {
       return;
     }
 
+    // 1. Create the form first
     const form = await createForm({ title: formState.title, description: formState.description });
+    
+    // 2. Save the questions to the newly created form
+    await addQuestionsToForm(form.id, questions);
+
+    // 3. Navigate to the edit screen
     navigate(`/forms/${form.id}/edit`);
   };
 
