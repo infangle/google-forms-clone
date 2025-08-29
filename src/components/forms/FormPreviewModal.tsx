@@ -1,8 +1,7 @@
 // src/components/forms/FormPreviewModal.tsx
 
 import type { Form } from "@/types/form";
-import type { Question, Option } from "@/types/question";
-import React from "react";
+import type { Question } from "@/types/question";
 
 interface FormPreviewModalProps {
   form: Form & { questions: Question[] };
