@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import type { Form } from "@/types/form";
 import type { Question } from "@/types/question";
 import { getFormById, updateForm } from "@/data/repos";
-import { updateQuestion } from "@/data/repos/questionsRepo";
+import { updateQuestion as updateQuestionOnServer } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
 
@@ -15,7 +15,9 @@ export default function EditFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [form, setForm] = useState<FormWithQuestions | null>(null);
-  const { questions, setQuestions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
+
+  // 1. Destructure dispatch and ACTION_TYPES from the hook
+  const { questions, addQuestion, areQuestionsValid, dispatch, ACTION_TYPES } = useQuestions();
 
   useEffect(() => {
     async function loadForm() {
@@ -23,13 +25,13 @@ export default function EditFormPage() {
       const data = await getFormById(id);
       if (data) {
         setForm({ ...data, questions: data.questions ?? [] });
-        setQuestions(data.questions ?? []);
+        dispatch(data.questions ?? []);
       } else {
         setForm(null);
       }
     }
     loadForm();
-  }, [id, setQuestions]);
+  }, [id, dispatch]);
 
   if (!form) return <div>Loading...</div>;
 
@@ -37,17 +39,27 @@ export default function EditFormPage() {
     setForm({ ...form, [field]: value });
   };
 
-  const handleQuestionChange = async (index: number, updated: Question) => {
-    updateQuestionAt(index, updated);
-    await updateQuestion(updated);
-  };
-
+  // 2. The handleQuestionChange logic is no longer needed in the parent component.
+  // The QuestionEditor will now handle dispatching updates directly to the reducer.
+  // We'll rename the updateQuestion import to avoid conflicts.
+  
   const handleSave = async () => {
-    if (questions.some((q) => q.text.trim() === "")) {
-      alert("Please fill in all question text.");
+    if (!form.title.trim()) {
+      alert("Form title cannot be empty.");
       return;
     }
+
+    if (!areQuestionsValid) {
+      alert("Please fix all errors in your questions before saving.");
+      return;
+    }
+
     await updateForm(form.id, { ...form, questions });
+    // You also need to persist the question updates to the database
+    for (const q of questions) {
+      await updateQuestionOnServer(q);
+    }
+    
     navigate("/forms");
   };
 
@@ -87,8 +99,9 @@ export default function EditFormPage() {
           key={q.id}
           question={q}
           index={index}
-          onChange={(updated) => handleQuestionChange(index, updated)}
-          onRemove={() => removeQuestionAt(index)}
+          // 3. Pass dispatch and ACTION_TYPES down as props
+          dispatch={dispatch}
+          ACTION_TYPES={ACTION_TYPES}
         />
       ))}
 
