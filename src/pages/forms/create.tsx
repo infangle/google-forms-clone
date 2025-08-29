@@ -2,45 +2,83 @@ import { useNavigate } from "react-router-dom";
 import { createForm } from "@/data/repos/formsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
+import { useState } from "react";
+import React from "react";
+// 1. Import the new modal component
+import FormPreviewModal from "@/components/forms/FormPreviewModal";
 
 export default function CreateFormPage() {
   const navigate = useNavigate();
-  const { questions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
+  const { questions, addQuestion, areQuestionsValid, dispatch, ACTION_TYPES } = useQuestions();
 
-  const handleSubmit = async (title: string, description: string) => {
-  // Validate question text
-  if (questions.some((q) => q.text.trim() === "")) {
-    alert("Please fill in all question text.");
-    return;
-  }
+  const [formState, setFormState] = useState({
+    title: "",
+    description: "",
+    errors: {
+      title: "",
+      description: ""
+    }
+  });
 
-  // Validate options for multiple-choice and checkbox
-  for (const q of questions) {
-    if ((q.type === "multiple-choice" || q.type === "checkbox") && (!q.options || q.options.length === 0)) {
-      alert(`Question "${q.text}" must have at least one option.`);
+  // 2. Add state to manage the visibility of the preview modal
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormState(prevState => ({
+      ...prevState,
+      [name]: value,
+      errors: {
+        ...prevState.errors,
+        [name]: ""
+      }
+    }));
+  };
+
+  const handleSubmit = async () => {
+    let hasError = false;
+    const newErrors = { title: "", description: "" };
+
+    if (!formState.title.trim()) {
+      newErrors.title = "Form title cannot be empty.";
+      hasError = true;
+    }
+
+    if (!areQuestionsValid) {
+        alert("Please correct the errors in your questions before submitting.");
+        return;
+    }
+
+    if (hasError) {
+      setFormState(prevState => ({
+        ...prevState,
+        errors: newErrors
+      }));
       return;
     }
-  }
 
-  // All validations passed, create form
-  const form = await createForm({ title, description });
-  navigate(`/forms/${form.id}/edit`);
-};
-
+    const form = await createForm({ title: formState.title, description: formState.description });
+    navigate(`/forms/${form.id}/edit`);
+  };
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Create New Form</h1>
 
       <div className="flex justify-end mt-2">
+        {/* 3. Add a button to open the preview modal */}
         <button
           type="button"
-          onClick={() => {
-            const titleInput = (document.getElementById("title") as HTMLInputElement).value;
-            const descInput = (document.getElementById("description") as HTMLTextAreaElement).value;
-            handleSubmit(titleInput, descInput);
-          }}
-    className="text-green-500 px-2 py-1 rounded hover:text-green-500 hover:underline focus:outline-none"
+          onClick={() => setIsPreviewOpen(true)}
+          className="text-blue-500 px-2 py-1 rounded hover:text-blue-500 hover:underline focus:outline-none"
+        >
+          Preview
+        </button>
+        
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="text-green-500 px-2 py-1 rounded hover:text-green-500 hover:underline focus:outline-none ml-4"
         >
           Create Form
         </button>
@@ -48,12 +86,27 @@ export default function CreateFormPage() {
 
       <label className="block mb-2">
         Title:
-        <input type="text" placeholder="Form title" className="border p-2 w-full mt-1" id="title" />
+        <input
+          type="text"
+          placeholder="Form title"
+          className="border p-2 w-full mt-1"
+          name="title"
+          value={formState.title}
+          onChange={handleInputChange}
+        />
+        {formState.errors.title && <p className="text-red-500 text-sm mt-1">{formState.errors.title}</p>}
       </label>
 
       <label className="block mb-4">
         Description:
-        <textarea placeholder="Form description" className="border p-2 w-full mt-1" id="description" />
+        <textarea
+          placeholder="Form description"
+          className="border p-2 w-full mt-1"
+          name="description"
+          value={formState.description}
+          onChange={handleInputChange}
+        />
+        {formState.errors.description && <p className="text-red-500 text-sm mt-1">{formState.errors.description}</p>}
       </label>
 
       <h2 className="text-xl font-semibold mb-2">Questions</h2>
@@ -62,17 +115,32 @@ export default function CreateFormPage() {
           key={q.id}
           question={q}
           index={index}
-          onChange={(updated) => updateQuestionAt(index, updated)}
-          onRemove={() => removeQuestionAt(index)}
+          dispatch={dispatch}
+          ACTION_TYPES={ACTION_TYPES}
         />
       ))}
 
-      <button type="button" onClick={addQuestion}             className="mt-1  text-blue-400 px-2 py-1 rounded hover: hover:text-blue-500 hover:underline focus:outline-none"
->
+      <button
+        type="button"
+        onClick={addQuestion}
+        className="mt-1 text-blue-400 px-2 py-1 rounded hover:text-blue-500 hover:underline focus:outline-none"
+      >
         Add Question
       </button>
 
-      
+      {/* 4. Conditionally render the preview modal */}
+      {isPreviewOpen && (
+        <FormPreviewModal
+      form={{
+        id: "preview-id", // Use a temporary, unique ID
+        createdAt: new Date(), // Use the current timestamp
+        updatedAt: new Date(), // Use the current timestamp
+        ...formState,
+        questions,
+      }}
+      onClose={() => setIsPreviewOpen(false)}
+    />
+      )}
     </div>
   );
 }

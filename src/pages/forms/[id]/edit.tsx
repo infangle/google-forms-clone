@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import type { Form } from "@/types/form";
 import type { Question } from "@/types/question";
 import { getFormById, updateForm } from "@/data/repos";
-import { updateQuestion } from "@/data/repos/questionsRepo";
+import { updateQuestion as updateQuestionOnServer } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
+import FormPreviewModal from "@/components/forms/FormPreviewModal";
 
 interface FormWithQuestions extends Form {
   questions: Question[];
@@ -15,7 +16,12 @@ export default function EditFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [form, setForm] = useState<FormWithQuestions | null>(null);
-  const { questions, setQuestions, addQuestion, updateQuestionAt, removeQuestionAt } = useQuestions();
+  
+  // 1. Add state to control modal visibility
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Destructure dispatch and ACTION_TYPES from the hook
+  const { questions, addQuestion, areQuestionsValid, dispatch, ACTION_TYPES } = useQuestions();
 
   useEffect(() => {
     async function loadForm() {
@@ -23,36 +29,43 @@ export default function EditFormPage() {
       const data = await getFormById(id);
       if (data) {
         setForm({ ...data, questions: data.questions ?? [] });
-        setQuestions(data.questions ?? []);
+        dispatch({ type: ACTION_TYPES.SET_QUESTIONS, payload: { questions: data.questions ?? [] } });
       } else {
         setForm(null);
       }
     }
     loadForm();
-  }, [id, setQuestions]);
+  }, [id, dispatch, ACTION_TYPES]);
 
   if (!form) return <div>Loading...</div>;
 
   const handleChange = (field: keyof Form, value: string) => {
     setForm({ ...form, [field]: value });
   };
-
-  const handleQuestionChange = async (index: number, updated: Question) => {
-    updateQuestionAt(index, updated);
-    await updateQuestion(updated);
-  };
-
+  
   const handleSave = async () => {
-    if (questions.some((q) => q.text.trim() === "")) {
-      alert("Please fill in all question text.");
+    if (!form.title.trim()) {
+      alert("Form title cannot be empty.");
       return;
     }
+
+    if (!areQuestionsValid) {
+      alert("Please fix all errors in your questions before saving.");
+      return;
+    }
+
     await updateForm(form.id, { ...form, questions });
+    // You also need to persist the question updates to the database
+    for (const q of questions) {
+      await updateQuestionOnServer(q);
+    }
+    
     navigate("/forms");
   };
 
   const goToPreview = () => {
-    navigate(`/forms/${form.id}/preview`, { state: { form: { ...form, questions } } });
+    // 2. Change logic to open the modal instead of navigating
+    setIsPreviewOpen(true);
   };
 
   return (
@@ -87,8 +100,8 @@ export default function EditFormPage() {
           key={q.id}
           question={q}
           index={index}
-          onChange={(updated) => handleQuestionChange(index, updated)}
-          onRemove={() => removeQuestionAt(index)}
+          dispatch={dispatch}
+          ACTION_TYPES={ACTION_TYPES}
         />
       ))}
 
@@ -144,6 +157,14 @@ export default function EditFormPage() {
           </button>
         </div>
       </div>
+      
+      {/* 3. Conditionally render the FormPreviewModal */}
+      {isPreviewOpen && form && (
+        <FormPreviewModal
+          form={{ ...form, questions }}
+          onClose={() => setIsPreviewOpen(false)}
+        />
+      )}
     </div>
   );
 }
