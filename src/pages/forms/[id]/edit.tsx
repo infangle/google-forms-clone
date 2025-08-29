@@ -1,24 +1,27 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import type { Form } from "@/types/form";
-import type { Question } from "@/types/question";
 import { getFormById, updateForm } from "@/data/repos";
-import { updateQuestion as updateQuestionOnServer } from "@/data/repos/questionsRepo";
 import QuestionEditor from "@/components/forms/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
 import FormPreviewModal from "@/components/forms/FormPreviewModal";
-
-interface FormWithQuestions extends Form {
-  questions: Question[];
-}
+import React from "react";
 
 export default function EditFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [form, setForm] = useState<FormWithQuestions | null>(null);
+  const [form, setForm] = useState<Form | null>(null);
   
-  // 1. Add state to control modal visibility
+  // 1. Add state to control modal visibility and form field data
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [formState, setFormState] = useState({
+    title: "",
+    description: "",
+    errors: {
+      title: "",
+      description: "",
+    },
+  });
 
   // Destructure dispatch and ACTION_TYPES from the hook
   const { questions, addQuestion, areQuestionsValid, dispatch, ACTION_TYPES } = useQuestions();
@@ -28,7 +31,12 @@ export default function EditFormPage() {
       if (!id) return;
       const data = await getFormById(id);
       if (data) {
-        setForm({ ...data, questions: data.questions ?? [] });
+        setForm(data); // Set the full form object
+        setFormState({
+          title: data.title,
+          description: data.description ?? "",
+          errors: { title: "", description: "" },
+        });
         dispatch({ type: ACTION_TYPES.SET_QUESTIONS, payload: { questions: data.questions ?? [] } });
       } else {
         setForm(null);
@@ -39,14 +47,25 @@ export default function EditFormPage() {
 
   if (!form) return <div>Loading...</div>;
 
-  const handleChange = (field: keyof Form, value: string) => {
-    setForm({ ...form, [field]: value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormState(prevState => ({
+      ...prevState,
+      [name]: value,
+      errors: {
+        ...prevState.errors,
+        [name]: ""
+      }
+    }));
   };
   
   const handleSave = async () => {
-    if (!form.title.trim()) {
-      alert("Form title cannot be empty.");
-      return;
+    let hasError = false;
+    const newErrors = { title: "", description: "" };
+
+    if (!formState.title.trim()) {
+      newErrors.title = "Form title cannot be empty.";
+      hasError = true;
     }
 
     if (!areQuestionsValid) {
@@ -54,17 +73,22 @@ export default function EditFormPage() {
       return;
     }
 
-    await updateForm(form.id, { ...form, questions });
-    // You also need to persist the question updates to the database
-    for (const q of questions) {
-      await updateQuestionOnServer(q);
+    if (hasError) {
+      setFormState((prevState) => ({ ...prevState, errors: newErrors }));
+      return;
     }
-    
+
+    const updatedFormData = {
+      ...form,
+      title: formState.title,
+      description: formState.description,
+      questions,
+    };
+    await updateForm(form.id, updatedFormData);
     navigate("/forms");
   };
 
   const goToPreview = () => {
-    // 2. Change logic to open the modal instead of navigating
     setIsPreviewOpen(true);
   };
 
@@ -77,20 +101,24 @@ export default function EditFormPage() {
         Title
         <input
           type="text"
-          value={form.title}
-          onChange={(e) => handleChange("title", e.target.value)}
+          name="title"
+          value={formState.title}
+          onChange={handleChange}
           className="border border-gray-200 rounded-md p-2 w-full mt-1"
         />
+        {formState.errors.title && <p className="text-red-500 text-sm mt-1">{formState.errors.title}</p>}
       </label>
 
       {/* Form Description */}
       <label className="block mb-4">
         Description
         <textarea
-          value={form.description ?? ""}
-          onChange={(e) => handleChange("description", e.target.value)}
+          name="description"
+          value={formState.description}
+          onChange={handleChange}
           className="border border-gray-200 rounded-md p-2 w-full mt-1"
         />
+        {formState.errors.description && <p className="text-red-500 text-sm mt-1">{formState.errors.description}</p>}
       </label>
 
       {/* Questions Section */}
@@ -161,7 +189,7 @@ export default function EditFormPage() {
       {/* 3. Conditionally render the FormPreviewModal */}
       {isPreviewOpen && form && (
         <FormPreviewModal
-          form={{ ...form, questions }}
+          form={{ ...form, questions, title: formState.title, description: formState.description }}
           onClose={() => setIsPreviewOpen(false)}
         />
       )}
