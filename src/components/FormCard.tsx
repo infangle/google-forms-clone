@@ -10,7 +10,7 @@ export default function FormCard({ form, onDelete }: Props) {
   return (
     <li
       className="w-[250px] h-[300px] bg-white border border-gray-100 rounded-sm
-                 hover:border-blue-400 transition flex flex-col relative"
+                  transition flex flex-col relative"
     >
       {/* Image / Preview section */}
       <div className="h-[80%] w-full flex items-center justify-center bg-gray-50 overflow-hidden">

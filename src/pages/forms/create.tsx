@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { createForm } from "@/data/repos/formsRepo";
-import QuestionEditor from "@/components/forms/QuestionEditor";
+import QuestionEditor from "@/components/QuestionEditor";
 import { useQuestions } from "@/hooks/useQuestions";
 import { useState } from "react";
 import React from "react";
 // 1. Import the new modal component
-import FormPreviewModal from "@/components/forms/FormPreviewModal";
+import FormPreviewModal from "@/components/FormPreviewModal";
 
 export default function CreateFormPage() {
   const navigate = useNavigate();
